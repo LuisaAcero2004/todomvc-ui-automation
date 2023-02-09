@@ -16,6 +16,13 @@ public class ListPage extends BasePage{
     private final static By editTaskName = By.cssSelector("div.view label");
     private final static By editTaskNameTextbox = By.cssSelector("input[type='text']");
     private final static By qtyTasks = By.cssSelector("[class='todo-count'] strong");
+    private final static By allTasksButton = By.cssSelector("a[href='#/all']");
+    private final static By activeTasksButton = By.cssSelector("a[href='#/active']");
+    private final static By completedTasksButton = By.cssSelector("a[href='#/completed']");
+    private final static By bulkCompleteTasksButton = By.cssSelector("label[for='toggle-all']");
+    private final static By clearCompletedButton = By.cssSelector("button[class='clear-completed']");
+
+    // private WebElement clearCompletedButton;
 
 
     public ListPage(WebDriver driver){
@@ -56,10 +63,34 @@ public class ListPage extends BasePage{
         driver.findElements(task).get(taskPosition).findElement(editTaskNameTextbox).sendKeys(newTaskName + Keys.ENTER);
     }
 
-    public String getNumberTasks(){
+    public void filterAllTasks(){
+        driver.findElement(allTasksButton).click();
+    }
+
+    public void filterActiveTasks(){
+        driver.findElement(activeTasksButton).click();
+    }
+
+    public void filterCompletedTasks(){
+        driver.findElement(completedTasksButton).click();
+    }
+
+    public void completeAllTasks(){
+        driver.findElement(bulkCompleteTasksButton).click();
+    }
+
+    public void clearCompletedTasks(){
+        driver.findElement(clearCompletedButton).click();
+    }
+
+    public String getNumberRemainingTasks(){
 
         return  driver.findElement(qtyTasks).getText();
 
+    }
+
+    public int getNumberTasks(){
+        return driver.findElements(task).size();
     }
 
     public String getTaskName(){

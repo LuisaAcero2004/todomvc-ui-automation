@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import static com.la.utilities.Constants.*;
 
 import java.time.Duration;
 
@@ -27,30 +28,77 @@ public class Tests {
     @Test()
     public void createNewTask(){
 
-        listPage.createNewTask(Constants.TASK_NAME);
+        listPage.createNewTask(TASK_NAME);
         assertThat(listPage.getNumberTasks(),equalTo("1"));
 
     }
 
     @Test
     public void completeTask(){
-        listPage.createNewTask(Constants.TASK_NAME);
+        listPage.createNewTask(TASK_NAME);
         listPage.completeTask();
         assertThat(listPage.getNumberTasks(),equalTo("0"));
     }
 
     @Test
     public void deleteTask(){
-        listPage.createNewTask(Constants.TASK_NAME);
+        listPage.createNewTask(TASK_NAME);
         listPage.deleteTask();
         assertThat(listPage.getNumberTasks(),equalTo(""));
     }
 
     @Test
     public void editTaskName(){
-        listPage.createNewTask(Constants.TASK_NAME);
-        listPage.editTaskName(Constants.NEW_TASK_NAME);
-        assertThat(listPage.getTaskName(),equalTo(Constants.TASK_NAME + Constants.NEW_TASK_NAME));
+        listPage.createNewTask(TASK_NAME);
+        listPage.editTaskName(NEW_TASK_NAME);
+        assertThat(listPage.getTaskName(),equalTo(TASK_NAME + NEW_TASK_NAME));
+    }
+
+    @Test
+    public void filterCompleted(){
+        listPage.createNewTask("first task");
+        listPage.createNewTask("second task");
+        listPage.createNewTask("third task");
+        listPage.createNewTask("fourth task");
+        listPage.editTaskName(" edited",1);
+        listPage.completeTask(2);
+        listPage.filterCompletedTasks();
+        assertThat(listPage.getNumberTasks(),equalTo(1));
+    }
+
+    @Test
+    public void filterAll(){
+        listPage.createNewTask("first task");
+        listPage.createNewTask("second task");
+        listPage.createNewTask("third task");
+        listPage.completeTask();
+        listPage.filterCompletedTasks();
+        listPage.filterAllTasks();
+        assertThat(listPage.getNumberTasks(),equalTo(3));
+    }
+
+    @Test
+    public void filterActive(){
+        listPage.createNewTask("first task");
+        listPage.createNewTask("second task");
+        listPage.createNewTask("third task");
+        listPage.createNewTask("fourth task");
+        listPage.deleteTask(3);
+        listPage.completeTask(2);
+        listPage.filterActiveTasks();
+        assertThat(listPage.getNumberTasks(),equalTo(2));
+    }
+
+    @Test
+    public void completeAllAndClearCompleted() throws InterruptedException {
+        listPage.createNewTask("first task");
+        listPage.createNewTask("second task");
+        listPage.createNewTask("third task");
+        listPage.createNewTask("fourth task");
+        listPage.completeAllTasks();
+        listPage.clearCompletedTasks();
+        assertThat(listPage.getNumberRemainingTasks(),equalTo(""));
+        assertThat(listPage.getNumberTasks(),equalTo(0));
     }
 
     @AfterEach
