@@ -1,16 +1,23 @@
+package com.la;
+
 import com.la.pages.ListPage;
 import com.la.utilities.Constants;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.edge.EdgeDriver;
-import org.testng.Assert;
-import org.testng.annotations.*;
+
+import java.time.Duration;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 public class Tests {
     private ListPage listPage;
     private WebDriver driver;
 
-    @BeforeMethod
+    @BeforeEach
     public void setUp(){
         driver = new ChromeDriver();
         listPage = new ListPage(driver);
@@ -21,7 +28,7 @@ public class Tests {
     public void createNewTask(){
 
         listPage.createNewTask(Constants.TASK_NAME);
-        Assert.assertEquals(listPage.getNumberTasks(),"1");
+        assertThat(listPage.getNumberTasks(),equalTo("1"));
 
     }
 
@@ -29,26 +36,30 @@ public class Tests {
     public void completeTask(){
         listPage.createNewTask(Constants.TASK_NAME);
         listPage.completeTask();
-        Assert.assertEquals(listPage.getNumberTasks(),"0");
+        assertThat(listPage.getNumberTasks(),equalTo("0"));
     }
 
     @Test
     public void deleteTask(){
         listPage.createNewTask(Constants.TASK_NAME);
         listPage.deleteTask();
-        Assert.assertEquals(listPage.getNumberTasks(),"");
+        assertThat(listPage.getNumberTasks(),equalTo(""));
     }
 
     @Test
     public void editTaskName(){
         listPage.createNewTask(Constants.TASK_NAME);
         listPage.editTaskName(Constants.NEW_TASK_NAME);
-        Assert.assertEquals(listPage.getTaskName(),Constants.TASK_NAME + Constants.NEW_TASK_NAME);
+        assertThat(listPage.getTaskName(),equalTo(Constants.TASK_NAME + Constants.NEW_TASK_NAME));
     }
 
-    @AfterMethod
+    @AfterEach
     public void finish(){
-        driver.quit();
+
+        if(driver != null && !driver.toString().contains("null")){
+            driver.quit();
+        }
+
     }
 
 
