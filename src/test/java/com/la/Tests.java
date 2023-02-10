@@ -1,18 +1,15 @@
 package com.la;
 
-import com.la.pages.ListPage;
+import com.la.todo.components.TaskComponent;
+import com.la.todo.pages.ListPage;
 import com.la.utilities.Constants;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import static com.la.utilities.Constants.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.Duration;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 
 public class Tests {
     private ListPage listPage;
@@ -28,77 +25,134 @@ public class Tests {
     @Test()
     public void createNewTask(){
 
-        listPage.createNewTask(TASK_NAME);
-        assertThat(listPage.getNumberTasks(),equalTo("1"));
+        listPage.createNewTask("Search a new cake recipe in the internet");
+
+        assertThat(listPage.getAllTasks())
+                .describedAs("Only one task should be created with the expected text")
+                .hasSize(1)
+                .first()
+                .extracting(TaskComponent::getTaskName)
+                .isEqualTo("Search a new cake recipe in the internet");
+
+        assertThat(listPage.getTasksCounterValue())
+                .describedAs("The remaining tasks counter should be one")
+                .hasSize(1);
 
     }
 
     @Test
     public void completeTask(){
-        listPage.createNewTask(TASK_NAME);
-        listPage.completeTask();
-        assertThat(listPage.getNumberTasks(),equalTo("0"));
+        listPage.createNewTask("Search a new cake recipe in the internet")
+                .getAllTasks()
+                .get(0)
+                .completeTask();
+
+        assertThat(listPage.getTasksCounterValue())
+                .describedAs("The remaining tasks counter should be zero")
+                .isEqualTo("0");
     }
 
     @Test
     public void deleteTask(){
-        listPage.createNewTask(TASK_NAME);
-        listPage.deleteTask();
-        assertThat(listPage.getNumberTasks(),equalTo(""));
+        listPage.createNewTask("Search a new cake recipe in the internet")
+                .getAllTasks()
+                .get(0)
+                .deleteTask();
+
+        assertThat(listPage.getTasksCounterValue())
+                .describedAs("The remaining tasks counter should be empty")
+                .isEqualTo("");
+
     }
 
     @Test
     public void editTaskName(){
-        listPage.createNewTask(TASK_NAME);
-        listPage.editTaskName(NEW_TASK_NAME);
-        assertThat(listPage.getTaskName(),equalTo(TASK_NAME + NEW_TASK_NAME));
+        listPage.createNewTask("Search a recipe to bake a")
+                .getAllTasks()
+                .get(0)
+                .editTaskName(" chocolate cake");
+
+        assertThat(listPage.getAllTasks())
+                .describedAs("The new task name should be the expected text")
+                .first()
+                .extracting(TaskComponent::getTaskName)
+                .isEqualTo("Search a recipe to bake a chocolate cake");
+
     }
 
     @Test
     public void filterCompleted(){
-        listPage.createNewTask("first task");
-        listPage.createNewTask("second task");
-        listPage.createNewTask("third task");
-        listPage.createNewTask("fourth task");
-        listPage.editTaskName(" edited",1);
-        listPage.completeTask(2);
-        listPage.filterCompletedTasks();
-        assertThat(listPage.getNumberTasks(),equalTo(1));
+        listPage.createNewTask("Search a new cake recipe in the internet")
+                .createNewTask("Make a list")
+                .createNewTask("Go to the shopping and buy the ingredients")
+                .createNewTask("Bake the cake")
+                .getAllTasks()
+                .get(1)
+                .editTaskName(" of the ingredients")
+                .getPage()
+                .getAllTasks()
+                .get(2)
+                .completeTask()
+                .getPage()
+                .filterCompletedTasks();
+
+        assertThat(listPage.getAllTasks())
+                .describedAs("Only one completed task should be visible")
+                .hasSize(1);
+
     }
 
     @Test
     public void filterAll(){
-        listPage.createNewTask("first task");
-        listPage.createNewTask("second task");
-        listPage.createNewTask("third task");
-        listPage.completeTask();
-        listPage.filterCompletedTasks();
-        listPage.filterAllTasks();
-        assertThat(listPage.getNumberTasks(),equalTo(3));
+
+        listPage.createNewTask("Search a new cake recipe in the internet")
+                .createNewTask("Make a list of the ingredients")
+                .createNewTask("Go to the shopping and buy the ingredients")
+                .createNewTask("Bake the cake")
+                .getAllTasks()
+                .get(0)
+                .completeTask()
+                .getPage()
+                .filterCompletedTasks()
+                .filterAllTasks();
+
+        assertThat(listPage.getAllTasks())
+                .describedAs("The four remaining and completed tasks should be visible")
+                .hasSize(4);
     }
 
     @Test
     public void filterActive(){
-        listPage.createNewTask("first task");
-        listPage.createNewTask("second task");
-        listPage.createNewTask("third task");
-        listPage.createNewTask("fourth task");
-        listPage.deleteTask(3);
-        listPage.completeTask(2);
-        listPage.filterActiveTasks();
-        assertThat(listPage.getNumberTasks(),equalTo(2));
+        listPage.createNewTask("Search a new cake recipe in the internet")
+                .createNewTask("Make a list of the ingredients")
+                .createNewTask("Go to the shopping and buy the ingredients")
+                .createNewTask("Bake the cake")
+                .getAllTasks()
+                .get(3)
+                .deleteTask()
+                .getAllTasks()
+                .get(2)
+                .completeTask()
+                .getPage()
+                .filterActiveTasks();
+
+        assertThat(listPage.getAllTasks())
+                .describedAs("Only the two remaining tasks should be visible")
+                .hasSize(2);
     }
 
     @Test
-    public void completeAllAndClearCompleted() throws InterruptedException {
-        listPage.createNewTask("first task");
-        listPage.createNewTask("second task");
-        listPage.createNewTask("third task");
-        listPage.createNewTask("fourth task");
-        listPage.completeAllTasks();
-        listPage.clearCompletedTasks();
-        assertThat(listPage.getNumberRemainingTasks(),equalTo(""));
-        assertThat(listPage.getNumberTasks(),equalTo(0));
+    public void completeAllAndClearCompleted(){
+        listPage.createNewTask("Search a new cake recipe in the internet")
+                .createNewTask("Make a list of the ingredients")
+                .createNewTask("Go to the shopping and buy the ingredients")
+                .createNewTask("Bake the cake")
+                .completeAllTasks()
+                .clearCompletedTasks();
+
+        assertThat(listPage.getTasksCounterValue())
+                .describedAs("The remaining tasks counter should be empty")
+                .isEqualTo("");
     }
 
     @AfterEach
